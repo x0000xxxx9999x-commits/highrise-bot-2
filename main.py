@@ -6,37 +6,72 @@ from highrise.models import SessionMetadata
 from highrise.__main__ import BotDefinition, main
 
 # ═══════════════════════════════════════
-# إعدادات الموقع
+# 🐉 هوية التنين
 # ═══════════════════════════════════════
+ROOM_NAME = "نرد التنين"
+DRAGON = "🐉"
+
+# إعدادات الموقع - البوت يبتعد عن الباب
 MOVE_X = 8
 MOVE_Z = 8
 MOVE_FACING = "FrontRight"
 
 # ═══════════════════════════════════════
-# بيانات
+# 🎲 البيانات
 # ═══════════════════════════════════════
+WELCOME_MESSAGES = [
+    "🐉 استيقظ التنين! مرحباً {user} في نرد التنين 🎲\n🔥 اقترب من الكنز! 💎",
+    "🐲 زئير التنين! {user} وصل! 👑\n🎲 تفضل بالمقامرة",
+    "🔥 من الأنقاض يخرج التنين! {user} نورت! 🐉\n💎 الكنوز في انتظارك",
+    "🐉 عين التنين تراقبك {user}... 👁️\n🎲 اقترب إن كنت تجرؤ!",
+    "👑 {user} دخل مملكة التنين! 🐲\n💎 الحظ معك اليوم"
+]
+
 JOKES = [
-    'واحد دخل المطعم قال: عندكم دجاج؟ قال: لا. قال: ليش المطعم مفتوح؟ قال: نخبر الناس! 😂',
-    'واحد راح للدكتور قال: كل ما أشرب شاي أحس بألم في عيني! قال: شيل الملعقة من الكوب! 😂',
-    'سألوا واحد: ليش تمشي ورا البنت؟ قال: من زود الأدب! 😂',
+    "واحد دخل المطعم قال: عندكم دجاج؟ قال: لا. قال: ليش المطعم مفتوح؟ قال: نخبر الناس! 😂",
+    "واحد راح للدكتور قال: كل ما أشرب شاي أحس بألم في عيني! قال: شيل الملعقة من الكوب! 😂",
+    "سألوا واحد: ليش تمشي ورا البنت؟ قال: من زود الأدب! 😂",
+    "واحد قال لصاحبه: أمس حلمت إني شربت بحر! قال: شلون؟ قال: بسرعة! 😂",
 ]
 
 RIDDLES = [
-    {'q': 'شي يمشي وما عنده رجلين؟', 'a': 'الماء'},
-    {'q': 'شي كل ما أخذت منه كبر؟', 'a': 'الحفرة'},
-    {'q': 'عنده أسنان وما يعض؟', 'a': 'المشط'},
+    {"q": "شي يمشي وما عنده رجلين؟", "a": "الماء"},
+    {"q": "شي كل ما أخذت منه كبر؟", "a": "الحفرة"},
+    {"q": "عنده أسنان وما يعض؟", "a": "المشط"},
+    {"q": "يدخل الماء ولا يبتل؟", "a": "الضوء"},
+    {"q": "كلما زاد نقص؟", "a": "العمر"},
 ]
 
 CHALLENGES = [
-    'اكتب اسمك بالمقلوب! 🔄',
-    'قل شي حلو لأول شخص يدخل! 🌹',
-    'سوي رقصة! 💃',
+    "🐉 ازأر كالتنين أمام الغرفة!",
+    "🔥 اكتب اسمك مع إيموجي النار",
+    "💎 قل شيئاً ثميناً لأول شخص يدخل",
+    "👑 تحدى التنين في التخمين!",
+    "🐲 قلد صوت التنين في الدردشة",
 ]
 
 COMPLIMENTS = [
-    'إنت أسطورة! 🔥',
-    'وجودك ينور الغرفة! ✨',
-    'إنت الأفضل! 💯',
+    "🐉 إنت مقاتل حقيقي! 🔥",
+    "💎 إنت كنز نادر في مملكة التنين! 👑",
+    "🔥 أنت أسطورة! 🐲",
+    "👑 التنين معجب بشجاعتك!",
+    "🐲 نورت عرين التنين! 💎",
+]
+
+DRAGON_WISDOM = [
+    "🐉 حكمة التنين: الحظ يعشق الجريء",
+    "🔥 التنين يقول: من يخاف لا يفوز",
+    "💎 كنز التنين: الوقت أغلى من الذهب",
+    "👑 التنين يهدر: القوة بلا عقل هلاك",
+    "🐲 من عرين التنين: الوفاء لا يُشترى",
+]
+
+GREETINGS_RESPONSES = [
+    "🐉 زئير! من يجرؤ على التحدي؟",
+    "🔥 هلا بالبطل! اقترب",
+    "💎 نورت المملكة!",
+    "👑 أهلاً بك في عرين التنين",
+    "🐲 مرحباً بك، تفضل بجولة في الكنوز",
 ]
 
 # ═══════════════════════════════════════
@@ -47,11 +82,17 @@ guess_games = {}
 riddle_games = {}
 
 
-class KhafajiBot2(BaseBot):
+def rand(arr):
+    return random.choice(arr)
+
+
+# ═══════════════════════════════════════
+# 🐉 كلاس التنين
+# ═══════════════════════════════════════
+class DragonBot(BaseBot):
 
     async def on_start(self, session_metadata: SessionMetadata) -> None:
-        print("✅ Bot 2 Connected!")
-        print("📡 Moving away from door...")
+        print(f"🐉 Dragon Bot Awakened in {ROOM_NAME}!")
         await asyncio.sleep(3)
         await self.move_away()
 
@@ -64,15 +105,18 @@ class KhafajiBot2(BaseBot):
                 facing=MOVE_FACING
             )
             await self.highrise.walk_to(position)
-            print(f"✅ Moved to ({MOVE_X}, {MOVE_Z})")
+            print(f"✅ Dragon moved to ({MOVE_X}, {MOVE_Z})")
         except Exception as e:
             print(f"❌ Move error: {e}")
 
-    async def on_user_join(self, user: User, position: Position | AnchorPosition) -> None:
-        print(f"👤 Join: {user.username}")
+    async def on_user_join(self, user: User, position) -> None:
+        print(f"👤 {user.username} entered the dragon's lair")
         try:
-            await asyncio.sleep(0.5)
-            await self.highrise.chat(f"مرحباً بك {user.username} في غرفة BLACK MARKET 🕶️")
+            await asyncio.sleep(0.8)
+            welcome = rand(WELCOME_MESSAGES).replace("{user}", user.username)
+            await self.highrise.chat(welcome)
+            await asyncio.sleep(2.5)
+            await self.highrise.chat("📜 اكتب !help لعرض أوامر التنين 🐉")
         except Exception as e:
             print(f"❌ Welcome error: {e}")
 
@@ -86,52 +130,60 @@ class KhafajiBot2(BaseBot):
 
             # !help
             if lower in ["!help", "!مساعدة"]:
-                await self.highrise.chat("📜 الأوامر: !1 !2 !3 !4 !5 !6 !7 !8 | !user | !رقص")
+                await self.highrise.chat(
+                    "🐉 أوامر التنين:\n"
+                    "🎲 !1 نرد التنين\n"
+                    "🪙 !2 عملة الحظ\n"
+                    "✊ !3 حجر ورقة مقص\n"
+                    "🎯 !4 خمن الكنز\n"
+                    "🧩 !5 لغز التنين\n"
+                    "😂 !6 نكتة\n"
+                    "😈 !7 تحدي\n"
+                    "🌹 !8 مدح\n"
+                    "👑 !9 حكمة التنين"
+                )
                 return
 
-            # !رقص
-            if lower in ["!رقص", "!dance"]:
-                await self.dance_self()
-                return
-
-            # !1 نرد
+            # !1 نرد التنين
             if lower in ["!1", "!نرد"]:
                 n = random.randint(1, 6)
-                await self.highrise.chat(f"🎲 {username}: {n}")
+                faces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
+                comments = ["🔥 التنين راضٍ!", "💎 حظ سعيد!", "🐉 النرد ساخن!", "👑 رمية ملكية!"]
+                await self.highrise.chat(f"🐉 {username} رمى نرد التنين: {faces[n-1]} {n}\n{rand(comments)}")
                 return
 
             # !2 عملة
             if lower in ["!2", "!عملة"]:
-                r = "صورة 👑" if random.random() < 0.5 else "كتابة 📝"
-                await self.highrise.chat(f"🪙 {username}: {r}")
+                r = "👑 رأس التنين" if random.random() < 0.5 else "💎 ذيل التنين"
+                await self.highrise.chat(f"🐲 {username} رما عملة التنين: {r}")
                 return
 
             # !3 حجر ورقة مقص
             if lower in ["!3", "!حجر"]:
                 rps_games[username] = True
-                await self.highrise.chat(f"✊ {username}: 1=حجر 2=ورقة 3=مقص")
+                await self.highrise.chat(f"✊ {username} اختر:\n1 = حجر 🪨\n2 = ورقة 📄\n3 = مقص ✂️")
                 return
 
             if username in rps_games and lower in ["1", "2", "3"]:
-                choices = {"1": "حجر", "2": "ورقة", "3": "مقص"}
+                choices = {"1": "حجر 🪨", "2": "ورقة 📄", "3": "مقص ✂️"}
                 bot_choice = str(random.randint(1, 3))
                 if lower == bot_choice:
                     result = "🤝 تعادل!"
                 elif (lower == "1" and bot_choice == "3") or \
                      (lower == "2" and bot_choice == "1") or \
                      (lower == "3" and bot_choice == "2"):
-                    result = "🎉 فزت!"
+                    result = "🎉 فزت على التنين! 🔥"
                 else:
-                    result = "😢 خسرت!"
-                await self.highrise.chat(f"أنت: {choices[lower]} | البوت: {choices[bot_choice]} — {result}")
+                    result = "😈 التنين فاز! 🐉"
+                await self.highrise.chat(f"أنت: {choices[lower]} | التنين: {choices[bot_choice]}\n{result}")
                 del rps_games[username]
                 return
 
-            # !4 خمن
+            # !4 خمن الكنز
             if lower in ["!4", "!خمن"]:
                 target = random.randint(1, 50)
                 guess_games[username] = {"target": target, "tries": 0}
-                await self.highrise.chat(f"🎯 {username} خمن رقم بين 1 و 50!")
+                await self.highrise.chat(f"🐉 {username} خمن رقم بين 1 و 50!\n💎 كنز التنين مخبأ!")
                 return
 
             if username in guess_games and lower.isdigit():
@@ -139,90 +191,70 @@ class KhafajiBot2(BaseBot):
                 game = guess_games[username]
                 game["tries"] += 1
                 if guess == game["target"]:
-                    await self.highrise.chat(f"🎉 {username} صح! في {game['tries']} محاولات")
+                    await self.highrise.chat(f"🎉 {username} لقى الكنز! 💎\nالرقم {game['target']} في {game['tries']} محاولات!")
                     del guess_games[username]
                 elif guess < game["target"]:
-                    await self.highrise.chat(f"⬆️ أكبر من {guess}")
+                    await self.highrise.chat(f"⬆️ الكنز أعلى من {guess}")
                 else:
-                    await self.highrise.chat(f"⬇️ أصغر من {guess}")
+                    await self.highrise.chat(f"⬇️ الكنز أقل من {guess}")
                 return
 
             # !5 لغز
             if lower in ["!5", "!لغز"]:
-                r = random.choice(RIDDLES)
+                r = rand(RIDDLES)
                 riddle_games[username] = r["a"]
-                await self.highrise.chat(f"🧩 {username} {r['q']}")
+                await self.highrise.chat(f"🐲 لغز التنين:\n🧩 {r['q']}")
                 return
 
             if username in riddle_games and not lower.startswith("!"):
                 answer = riddle_games[username]
                 if text == answer:
-                    await self.highrise.chat(f"🎉 {username} صح!")
+                    await self.highrise.chat(f"🎉 {username} ذكي كالتنين! الجواب {answer}")
                 else:
-                    await self.highrise.chat(f"❌ خطأ! الجواب: {answer}")
+                    await self.highrise.chat(f"❌ خطأ! الجواب {answer}")
                 del riddle_games[username]
                 return
 
             # !6 نكتة
             if lower in ["!6", "!نكتة"]:
-                await self.highrise.chat(f"😂 {username} {random.choice(JOKES)}")
+                await self.highrise.chat(f"😂 التنين يضحك:\n{rand(JOKES)}")
                 return
 
             # !7 تحدي
             if lower in ["!7", "!تحدي"]:
-                await self.highrise.chat(f"😈 {username} {random.choice(CHALLENGES)}")
+                await self.highrise.chat(f"🐉 التنين يتحدى {username}:\n{rand(CHALLENGES)}")
                 return
 
             # !8 مدح
             if lower in ["!8", "!مدح"]:
-                await self.highrise.chat(f"🌹 {username} {random.choice(COMPLIMENTS)}")
+                await self.highrise.chat(rand(COMPLIMENTS))
                 return
 
-            # !user
-            if lower.startswith("!user") or lower.startswith("!معلومات"):
-                target = text.replace("!user", "").replace("!معلومات", "").strip().replace("@", "").strip()
-                if not target:
-                    target = username
-                await self.highrise.chat(f"🔍 جاري البحث عن {target}...")
-                try:
-                    profile = await self.highrise.get_user(target)
-                    if profile and profile.user:
-                        u = profile.user
-                        info = [f"👤 {u.username}"]
-                        if hasattr(u, 'bio') and u.bio:
-                            info.append(f"📝 {u.bio}")
-                        info.append(f"⭐ {getattr(u, 'followers', 0)}")
-                        await self.highrise.chat(f"📋 {' | '.join(info)}")
-                    else:
-                        await self.highrise.chat(f"❌ ما لقيت {target}")
-                except Exception as e:
-                    print(f"❌ user error: {e}")
-                    await self.highrise.chat(f"⚠️ خطأ")
+            # !9 حكمة
+            if lower in ["!9", "!حكمة"]:
+                await self.highrise.chat(rand(DRAGON_WISDOM))
                 return
 
             # ردود تلقائية
             greetings = ["هلا", "مرحبا", "سلام", "اهلا", "hi", "hello"]
             if lower in greetings:
-                await self.highrise.chat(f"👋 أهلاً {username}!")
+                await self.highrise.chat(rand(GREETINGS_RESPONSES))
                 return
 
             if "شكرا" in lower or "تسلم" in lower:
-                await self.highrise.chat(f"🤍 على الرحب {username}!")
+                await self.highrise.chat(f"👑 التنين يشكرك {username}! 💎")
+                return
+
+            if "شلونك" in lower or "كيفك" in lower:
+                await self.highrise.chat("🐉 التنين بخير، يحرس الكنوز! 💎")
                 return
 
         except Exception as e:
             print(f"❌ Chat error: {e}")
 
-    async def dance_self(self):
-        try:
-            await self.highrise.send_emote("emote-dance")
-            await self.highrise.chat("💃 يرقص!")
-        except Exception as e:
-            print(f"❌ Dance error: {e}")
-
 
 # ═══════════════════════════════════════
-# تشغيل
+# 🚀 التشغيل
 # ═══════════════════════════════════════
 if __name__ == "__main__":
     token = os.getenv("HIGHRISE_TOKEN", "")
@@ -232,5 +264,7 @@ if __name__ == "__main__":
         print("❌ Missing HIGHRISE_TOKEN or HIGHRISE_ROOM_ID")
         exit(1)
 
-    print("🚀 Starting bot 2...")
-    main([BotDefinition(KhafajiBot2(), room_id, token)])
+    print("🐉 Dragon Bot Rising...")
+    
+    # ← الأهم: نستدعي main() مع asyncio.run()
+    asyncio.run(main([BotDefinition(DragonBot(), room_id, token)]))
