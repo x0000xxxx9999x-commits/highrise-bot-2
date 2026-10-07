@@ -1,2 +1,4 @@
-highrise-bot-sdk==0.19.5
-pendulum==3.0.0
+highrise-bot-sdk
+pendulum==2.1.2
+python-dateutil
+pytz
