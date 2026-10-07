@@ -14,4 +14,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "main.py"]
+# ⚡ تشغيل Python بدون buffering ← عشان نشوف السجلات فوراً
+CMD ["python", "-u", "main.py"]
