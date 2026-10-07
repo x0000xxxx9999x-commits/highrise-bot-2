@@ -6,27 +6,66 @@ from highrise.models import SessionMetadata
 from highrise.__main__ import BotDefinition, main
 
 # ═══════════════════════════════════════
-# 🐉 هوية التنين
+# 🐉 إعدادات الغرفة
 # ═══════════════════════════════════════
 ROOM_NAME = "نرد التنين"
-DRAGON = "🐉"
 
-# إعدادات الموقع - البوت يبتعد عن الباب
-MOVE_X = 8
-MOVE_Z = 8
-MOVE_FACING = "FrontRight"
+# مساحة الحركة العشوائية (18 × 30 → نستخدم حدود آمنة)
+ROOM_X_MIN = -6
+ROOM_X_MAX = 6
+ROOM_Z_MIN = -10
+ROOM_Z_MAX = 10
+
+# وقت بين كل حركة
+MOVE_MIN_DELAY = 8
+MOVE_MAX_DELAY = 15
 
 # ═══════════════════════════════════════
-# 🎲 البيانات
+# 🐉 رسائل حسب العلاقة
 # ═══════════════════════════════════════
-WELCOME_MESSAGES = [
-    "🐉 استيقظ التنين! مرحباً {user} في نرد التنين 🎲\n🔥 اقترب من الكنز! 💎",
-    "🐲 زئير التنين! {user} وصل! 👑\n🎲 تفضل بالمقامرة",
-    "🔥 من الأنقاض يخرج التنين! {user} نورت! 🐉\n💎 الكنوز في انتظارك",
-    "🐉 عين التنين تراقبك {user}... 👁️\n🎲 اقترب إن كنت تجرؤ!",
-    "👑 {user} دخل مملكة التنين! 🐲\n💎 الحظ معك اليوم"
+NEW_USER_MESSAGES = [
+    "🐉 زئير! من هذا الغريب؟ 👁️\nمرحباً {user}! أول مرة أشوفك هنا 🌟",
+    "🐲 أوه! وجه جديد!\nأهلاً بك {user} في عرين التنين 💎",
+    "🔥 التنين شمّ رائحة جديدة!\nمنور {user}! شنو اسمك؟ 🌟",
+    "🐉 عين التنين رصدتك {user}...\nمرحباً بك في مملكتي 👑",
 ]
 
+FRIEND_MESSAGES = [
+    "🐉 يا هلا! {user} رجع!\nنورتني مرة ثانية 💎",
+    "🔥 {user}! التنين كان ينتظرك! 👑",
+    "🐲 أهلاً {user}!\nكل مرة تجي فيها = صديق أفضل 🌟",
+    "💎 {user} وصل! التنين يحب شوفتك 🐉",
+]
+
+CLOSE_FRIEND_MESSAGES = [
+    "🐉 {user}!! التنين اشتاقلك!\nإنت من أعز الأصدقاء 💎",
+    "👑 يا هلا {user}!\nإنت من أفراد المملكة المقربين 🔥",
+    "🐲 {user} الوحش رجع!\nغرفة التنين تنور بوجودك ✨",
+]
+
+BEST_FRIEND_MESSAGES = [
+    "🐉 {user}!! أخيراً!\nإنت أخو التنين الحقيقي! 👑🔥",
+    "💎 {user}!\nالتنين يضع تاجك اليوم! 👑",
+    "🔥 {user}!\nإنت كنز المملكة! 💎🐉",
+]
+
+# ═══════════════════════════════════════
+# 🐉 أسئلة للمتابعة
+# ═══════════════════════════════════════
+QUESTIONS = [
+    "🐉 شنو أخبارك اليوم؟",
+    "💎 كيف كان يومك؟",
+    "🔥 شنو سويت اليوم؟",
+    "👑 شنو تحب تسوي باللعبة؟",
+    "🐲 وين تحب تلعب عادة؟",
+    "🌟 تعرف أحد ثاني في الغرفة؟",
+    "💎 شنو نوع الألعاب المفضلة عندك؟",
+    "🔥 هل تلعب Highrise من مدة طويلة؟",
+]
+
+# ═══════════════════════════════════════
+# 🐉 بيانات الألعاب
+# ═══════════════════════════════════════
 JOKES = [
     "واحد دخل المطعم قال: عندكم دجاج؟ قال: لا. قال: ليش المطعم مفتوح؟ قال: نخبر الناس! 😂",
     "واحد راح للدكتور قال: كل ما أشرب شاي أحس بألم في عيني! قال: شيل الملعقة من الكوب! 😂",
@@ -47,12 +86,12 @@ CHALLENGES = [
     "🔥 اكتب اسمك مع إيموجي النار",
     "💎 قل شيئاً ثميناً لأول شخص يدخل",
     "👑 تحدى التنين في التخمين!",
-    "🐲 قلد صوت التنين في الدردشة",
+    "🐲 قلد صوت التنين",
 ]
 
 COMPLIMENTS = [
     "🐉 إنت مقاتل حقيقي! 🔥",
-    "💎 إنت كنز نادر في مملكة التنين! 👑",
+    "💎 إنت كنز نادر! 👑",
     "🔥 أنت أسطورة! 🐲",
     "👑 التنين معجب بشجاعتك!",
     "🐲 نورت عرين التنين! 💎",
@@ -71,15 +110,17 @@ GREETINGS_RESPONSES = [
     "🔥 هلا بالبطل! اقترب",
     "💎 نورت المملكة!",
     "👑 أهلاً بك في عرين التنين",
-    "🐲 مرحباً بك، تفضل بجولة في الكنوز",
 ]
 
 # ═══════════════════════════════════════
-# ذاكرة الألعاب
+# ذاكرة الألعاب (لا تُحفظ)
 # ═══════════════════════════════════════
 rps_games = {}
 guess_games = {}
 riddle_games = {}
+
+# ذاكرة العلاقات (تُفقد عند Restart)
+user_visits = {}     # {username: عدد الزيارات}
 
 
 def rand(arr):
@@ -87,39 +128,110 @@ def rand(arr):
 
 
 # ═══════════════════════════════════════
-# 🐉 كلاس التنين
+# 🐉 كلاس البوت
 # ═══════════════════════════════════════
 class DragonBot(BaseBot):
+
+    def __init__(self):
+        super().__init__()
+        self.movement_task = None
+        self.is_greeting = False
+        self.current_target = None
 
     async def on_start(self, session_metadata: SessionMetadata) -> None:
         print(f"🐉 Dragon Bot Awakened in {ROOM_NAME}!")
         await asyncio.sleep(3)
-        await self.move_away()
+        # ابدأ حلقة الحركة العشوائية
+        self.movement_task = asyncio.create_task(self.random_movement_loop())
 
-    async def move_away(self):
-        try:
-            position = Position(
-                x=float(MOVE_X),
-                y=0.0,
-                z=float(MOVE_Z),
-                facing=MOVE_FACING
-            )
-            await self.highrise.walk_to(position)
-            print(f"✅ Dragon moved to ({MOVE_X}, {MOVE_Z})")
-        except Exception as e:
-            print(f"❌ Move error: {e}")
+    # ═══════════════════════════════════════
+    # 🚶 الحركة العشوائية
+    # ═══════════════════════════════════════
+    async def random_movement_loop(self):
+        while True:
+            try:
+                if not self.is_greeting:
+                    x = random.uniform(ROOM_X_MIN, ROOM_X_MAX)
+                    z = random.uniform(ROOM_Z_MIN, ROOM_Z_MAX)
+                    pos = Position(
+                        x=float(x),
+                        y=0.0,
+                        z=float(z),
+                        facing="FrontRight"
+                    )
+                    await self.highrise.walk_to(pos)
+                    print(f"🚶 Random move → ({x:.1f}, {z:.1f})")
+                
+                delay = random.uniform(MOVE_MIN_DELAY, MOVE_MAX_DELAY)
+                await asyncio.sleep(delay)
+            except Exception as e:
+                print(f"❌ Move error: {e}")
+                await asyncio.sleep(5)
 
+    # ═══════════════════════════════════════
+    # 👤 عندما يدخل مستخدم
+    # ═══════════════════════════════════════
     async def on_user_join(self, user: User, position) -> None:
-        print(f"👤 {user.username} entered the dragon's lair")
         try:
-            await asyncio.sleep(0.8)
-            welcome = rand(WELCOME_MESSAGES).replace("{user}", user.username)
-            await self.highrise.chat(welcome)
-            await asyncio.sleep(2.5)
-            await self.highrise.chat("📜 اكتب !help لعرض أوامر التنين 🐉")
-        except Exception as e:
-            print(f"❌ Welcome error: {e}")
+            username = user.username
+            print(f"👤 {username} entered the lair")
 
+            # إيقاف الحركة العشوائية
+            self.is_greeting = True
+            await asyncio.sleep(0.5)
+
+            # التحرك نحو المستخدم
+            try:
+                if position and hasattr(position, 'x') and hasattr(position, 'z'):
+                    target_x = position.x + random.uniform(-1.5, 1.5)
+                    target_z = position.z + random.uniform(-1.5, 1.5)
+                    pos = Position(
+                        x=float(target_x),
+                        y=0.0,
+                        z=float(target_z),
+                        facing="FrontRight"
+                    )
+                    await self.highrise.walk_to(pos)
+                    print(f"🚶 Moving toward {username} → ({target_x:.1f}, {target_z:.1f})")
+                    await asyncio.sleep(2)
+            except Exception as e:
+                print(f"⚠️ Walk to user error: {e}")
+
+            # عدد الزيارات
+            visits = user_visits.get(username, 0)
+            user_visits[username] = visits + 1
+
+            # اختيار الرسالة حسب العلاقة
+            if visits == 0:
+                greeting = rand(NEW_USER_MESSAGES).replace("{user}", username)
+                print(f"🌟 New user: {username}")
+            elif visits < 5:
+                greeting = rand(FRIEND_MESSAGES).replace("{user}", username)
+                print(f"💎 Friend: {username} ({visits+1} visits)")
+            elif visits < 15:
+                greeting = rand(CLOSE_FRIEND_MESSAGES).replace("{user}", username)
+                print(f"👑 Close friend: {username} ({visits+1} visits)")
+            else:
+                greeting = rand(BEST_FRIEND_MESSAGES).replace("{user}", username)
+                print(f"🔥 Best friend: {username} ({visits+1} visits)")
+
+            await self.highrise.chat(greeting)
+
+            # سؤال متابعة بعد 3 ثواني
+            await asyncio.sleep(3)
+            question = rand(QUESTIONS)
+            await self.highrise.chat(question)
+
+        except Exception as e:
+            print(f"❌ Join error: {e}")
+        finally:
+            # انتظار قبل استئناف الحركة
+            await asyncio.sleep(5)
+            self.is_greeting = False
+
+    # ═══════════════════════════════════════
+    # 💬 استقبال الرسائل
+    # ═══════════════════════════════════════
     async def on_chat(self, user: User, message: str) -> None:
         try:
             username = user.username
@@ -144,7 +256,7 @@ class DragonBot(BaseBot):
                 )
                 return
 
-            # !1 نرد التنين
+            # !1 نرد
             if lower in ["!1", "!نرد"]:
                 n = random.randint(1, 6)
                 faces = ["⚀", "⚁", "⚂", "⚃", "⚄", "⚅"]
@@ -179,7 +291,7 @@ class DragonBot(BaseBot):
                 del rps_games[username]
                 return
 
-            # !4 خمن الكنز
+            # !4 خمن
             if lower in ["!4", "!خمن"]:
                 target = random.randint(1, 50)
                 guess_games[username] = {"target": target, "tries": 0}
@@ -246,7 +358,7 @@ class DragonBot(BaseBot):
                 return
 
             if "شلونك" in lower or "كيفك" in lower:
-                await self.highrise.chat("🐉 التنين بخير، يحرس الكنوز! 💎")
+                await self.highrise.chat(f"🐉 التنين بخير! شنو أخبارك {username}؟")
                 return
 
         except Exception as e:
@@ -265,6 +377,4 @@ if __name__ == "__main__":
         exit(1)
 
     print("🐉 Dragon Bot Rising...")
-    
-    # ← الأهم: نستدعي main() مع asyncio.run()
     asyncio.run(main([BotDefinition(DragonBot(), room_id, token)]))
