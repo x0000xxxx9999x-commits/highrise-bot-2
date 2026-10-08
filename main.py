@@ -5,10 +5,10 @@ from highrise import BaseBot, User
 from highrise.models import SessionMetadata
 from highrise.__main__ import BotDefinition, main
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-
-# ═══ OpenAI-compatible endpoint (يعمل مع Gemini) ═══
-GEMINI_OPENAI_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+# ═══ OpenRouter ═══
+OPENROUTER_KEY = os.getenv("OPENROUTER_KEY", "")
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL = "meta-llama/llama-3.3-70b-instruct:free"
 
 SYSTEM_PROMPT = """أنت "التنين" - بوت في Highrise، حارس غرفة "نرد التنين".
 شخصيتك: تنين أسطوري، فخور لكن لطيف.
@@ -17,23 +17,17 @@ SYSTEM_PROMPT = """أنت "التنين" - بوت في Highrise، حارس غر�
 تستخدم إيموجي: 🐉🔥💎👑
 لا تذكر أنك AI أو بوت - أنت التنين فقط."""
 
-# الموديلات للتجربة
-MODELS = [
-    "gemini-2.0-flash",
-    "gemini-2.5-flash",
-    "gemini-2.0-flash-exp",
-    "gemini-1.5-flash",
-    "gemini-flash-latest",
-]
-
 
 class DragonBot(BaseBot):
 
     async def on_start(self, session_metadata: SessionMetadata) -> None:
         print("═══════════════════════════════════", flush=True)
         print("🐉 DRAGON BOT STARTED", flush=True)
-        print(f"🔑 Key: {GEMINI_API_KEY[:15]}..." if GEMINI_API_KEY else "❌ No Key", flush=True)
-        print("🌐 Using OpenAI-compatible endpoint", flush=True)
+        if OPENROUTER_KEY:
+            print(f"🔑 Key: {OPENROUTER_KEY[:15]}...", flush=True)
+        else:
+            print("❌ No OPENROUTER_KEY!", flush=True)
+        print(f"🌐 Model: {OPENROUTER_MODEL}", flush=True)
         print("═══════════════════════════════════", flush=True)
 
     async def on_user_join(self, user: User, position) -> None:
@@ -75,21 +69,15 @@ class DragonBot(BaseBot):
             print(f"❌ Chat: {e}", flush=True)
 
     async def ask_ai(self, username: str, message: str):
-        for model in MODELS:
-            result = await self.try_openai(model, username, message)
-            if result:
-                print(f"✅ Model works: {model}", flush=True)
-                return result
-        return None
-
-    async def try_openai(self, model: str, username: str, message: str):
         try:
             headers = {
-                "Authorization": f"Bearer {GEMINI_API_KEY}",
+                "Authorization": f"Bearer {OPENROUTER_KEY}",
                 "Content-Type": "application/json",
+                "HTTP-Referer": "https://highrise.game",
+                "X-Title": "Dragon Bot",
             }
             body = {
-                "model": model,
+                "model": OPENROUTER_MODEL,
                 "messages": [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": f"{username}: {message}"},
@@ -100,9 +88,9 @@ class DragonBot(BaseBot):
 
             async with aiohttp.ClientSession() as session:
                 async with session.post(
-                    GEMINI_OPENAI_URL, headers=headers, json=body, timeout=20
+                    OPENROUTER_URL, headers=headers, json=body, timeout=25
                 ) as resp:
-                    print(f"📡 {model}: {resp.status}", flush=True)
+                    print(f"📡 Response: {resp.status}", flush=True)
                     if resp.status == 200:
                         data = await resp.json()
                         try:
@@ -111,13 +99,13 @@ class DragonBot(BaseBot):
                             return None
                     else:
                         err = await resp.text()
-                        print(f"❌ {model} {resp.status}: {err[:150]}", flush=True)
+                        print(f"❌ {resp.status}: {err[:200]}", flush=True)
                         return None
         except asyncio.TimeoutError:
-            print(f"❌ {model} timeout", flush=True)
+            print("❌ Timeout", flush=True)
             return None
         except Exception as e:
-            print(f"❌ {model}: {e}", flush=True)
+            print(f"❌ {e}", flush=True)
             return None
 
 
